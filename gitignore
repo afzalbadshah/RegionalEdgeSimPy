@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / editor folders
+.vscode/
+.idea/
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Results and artifacts
+results/
+*.csv
+*.log
+*.png
+*.pdf
+
+# Jupyter/plots
+.ipynb_checkpoints/

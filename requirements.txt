@@ -1,0 +1,4 @@
+# Core simulator uses only the Python standard library.
+# Install these for visualization/examples:
+pandas>=2.0.0
+matplotlib>=3.7.0

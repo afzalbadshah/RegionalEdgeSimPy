@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>RegionalEdgeSimPy — Visualization Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --fg:#1b1f23; --muted:#586069; --bg:#ffffff; --accent:#0b5fff; --code:#f6f8fa; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;line-height:1.55;color:var(--fg);background:var(--bg);margin:0;padding:0}
+    header{padding:24px 16px;border-bottom:1px solid #eaecef}
+    header h1{margin:0;font-size:20px}
+    main{max-width:980px;margin:0 auto;padding:24px 16px}
+    h2{margin-top:28px;margin-bottom:8px;font-size:18px}
+    h3{margin-top:22px;margin-bottom:6px;font-size:16px}
+    p{margin:8px 0}
+    ul{margin:8px 0 16px 20px}
+    code, pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto;border:1px solid #eaecef}
+    .note{font-size:14px;color:var(--muted)}
+    .tip{background:#f0f7ff;border:1px solid #d0e2ff;padding:10px;border-radius:8px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    footer{margin-top:36px;padding:16px;border-top:1px solid #eaecef;color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>RegionalEdgeSimPy — How to Visualize Your Results</h1>
+  <div class="note">Author: Dr. Afzal Badshah • Department of Software Engineering, University of Sargodha</div>
+</header>
+
+<main>
+  <p>
+    The simulator writes a CSV at <code>results/task_metrics_log.csv</code>.
+    You can customize plots by changing which columns to read and how to group them.
+    Below are simple, beginner-friendly templates using <strong>pandas</strong> and <strong>matplotlib</strong>.
+  </p>
+
+  <h2>1) Quick start: line plot over rounds</h2>
+  <p>Plot CPU utilization by paradigm (Edge/Regional/Cloud) across rounds.</p>
+  <pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("results/task_metrics_log.csv")  # columns like: Round, CPU (%), Paradigm, Workload, Devices
+
+metric = "CPU (%)"              # &lt;— change to "Memory (%)", "Conges(%)", "Energy", etc.
+x_col  = "Round"                # &lt;— change to "Workload" or "Devices" to match your paper
+group  = "Paradigm"             # Edge_1, Regional_1, Cloud_1...
+
+plt.figure()
+for name, g in df.groupby(group):
+    plt.plot(g[x_col], g[metric], label=name, marker='o')
+
+plt.xlabel(x_col)
+plt.ylabel(metric)
+plt.legend(title=group)
+plt.title(f"{metric} vs {x_col}")
+plt.tight_layout()
+plt.savefig("visualization/line_{}_by_{}.png".format(metric.replace(" ", "_"), x_col))
+plt.show()</code></pre>
+
+  <h2>2) Switching x-axis to workload or devices</h2>
+  <p>Change <code>x_col</code> to <code>"Workload"</code> (KB) or <code>"Devices"</code>:</p>
+  <pre><code>x_col = "Workload"  # or "Devices"
+metric = "Avg_Tx(ms)"  # example: transmission delay
+# re-run the plotting loop above</code></pre>
+
+  <h2>3) Filtering tiers (e.g., only Edge)</h2>
+  <pre><code>df_edge = df[df["Paradigm"].str.startswith("Edge")]
+# Then group by Edge servers only
+for name, g in df_edge.groupby("Paradigm"):
+    plt.plot(g["Round"], g["CPU (%)"], label=name)</code></pre>
+
+  <h2>4) Bar chart: average metric per paradigm</h2>
+  <p>Average your chosen metric across all rounds and compare paradigms.</p>
+  <pre><code>metric = "Energy"
+avg = df.groupby("Paradigm")[metric].mean().reset_index()
+
+plt.figure()
+plt.bar(avg["Paradigm"], avg[metric])
+plt.ylabel(f"Average {metric}")
+plt.xticks(rotation=20)
+plt.title(f"Average {metric} by Paradigm")
+plt.tight_layout()
+plt.savefig("visualization/bar_avg_{}.png".format(metric))
+plt.show()</code></pre>
+
+  <h2>5) Multi-axis example: workload vs delays</h2>
+  <p>Plot both transmission and propagation delays against workload.</p>
+  <pre><code>x = "Workload"
+y1 = "Avg_Tx(ms)"
+y2 = "Avg_Prop(ms)"
+
+plt.figure()
+plt.plot(df[x], df[y1], marker='o', label=y1)
+plt.plot(df[x], df[y2], marker='s', label=y2)
+plt.xlabel(x)
+plt.ylabel("Delay (ms)")
+plt.legend()
+plt.title("Delays vs Workload")
+plt.tight_layout()
+plt.savefig("visualization/delays_vs_workload.png")
+plt.show()</code></pre>
+
+  <h2>6) Common column names</h2>
+  <ul>
+    <li><code>Round</code>, <code>Devices</code>, <code>Workload</code>, <code>Paradigm</code></li>
+    <li><code>CPU (%)</code>, <code>Memory (%)</code>, <code>Storage (%)</code>, <code>Conges(%)</code></li>
+    <li><code>Avg_Tx(ms)</code>, <code>Avg_Prop(ms)</code></li>
+    <li><code>Tx_Cost</code>, <code>Proc_Cost</code>, <code>Energy</code></li>
+  </ul>
+
+  <h2>7) Tips</h2>
+  <ul>
+    <li>Make sure the CSV path is correct: <code>results/task_metrics_log.csv</code>.</li>
+    <li>Create the folder <code>visualization/</code> before saving figures.</li>
+    <li>Rename axes to match your paper (e.g., "Workload (KB)").</li>
+    <li>Filter by <code>Paradigm</code> if you want separate charts for Edge/Regional/Cloud.</li>
+  </ul>
+
+  <h2>Need help?</h2>
+  <p>Ask questions or share your plots on the discussion forum:
+    <a href="https://resp.afzalbadshah.com" target="_blank" rel="noopener">resp.afzalbadshah.com</a>
+  </p>
+</main>
+
+<footer>
+  RegionalEdgeSimPy — Educational Release
+</footer>
+</body>
+</html>

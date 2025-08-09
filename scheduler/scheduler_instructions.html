@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>RegionalEdgeSimPy — Write Your Own Scheduler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --fg:#1b1f23; --muted:#586069; --bg:#ffffff; --accent:#0b5fff; --code:#f6f8fa; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;line-height:1.55;color:var(--fg);background:var(--bg);margin:0;padding:0}
+    header{padding:24px 16px;border-bottom:1px solid #eaecef}
+    header h1{margin:0;font-size:20px}
+    main{max-width:980px;margin:0 auto;padding:24px 16px}
+    h2{margin-top:28px;margin-bottom:8px;font-size:18px}
+    p{margin:8px 0}
+    ul{margin:8px 0 16px 20px}
+    code, pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    pre{background:var(--code);padding:12px;border-radius:8px;overflow:auto;border:1px solid #eaecef}
+    .note{font-size:14px;color:var(--muted)}
+    .tip{background:#f0f7ff;border:1px solid #d0e2ff;padding:10px;border-radius:8px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    footer{margin-top:36px;padding:16px;border-top:1px solid #eaecef;color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>RegionalEdgeSimPy — How to Write Your Own Scheduler</h1>
+  <div class="note">Author: Dr. Afzal Badshah • Department of Software Engineering, University of Sargodha</div>
+</header>
+
+<main>
+  <p>
+    A scheduler decides which server (Edge / Regional / Cloud) each task should run on.
+    To plug in your own logic, create a class that inherits <code>BaseScheduler</code> and implement a single method:
+    <code>schedule(self, tasks, servers, current_time)</code>.
+  </p>
+
+  <h2>Minimal Example</h2>
+  <pre><code># scheduler/my_scheduler.py
+from scheduler.base_scheduler import BaseScheduler
+
+class MyScheduler(BaseScheduler):
+    def schedule(self, tasks, servers, current_time):
+        assignments = []
+        for task in tasks:
+            for srv in servers:
+                if srv.can_allocate(task.cpu_demand, task.data_size_kb, task.memory_demand):
+                    task.set_server(srv.name)
+                    assignments.append((task, srv))
+                    break
+        return assignments
+</code></pre>
+
+  <h2>Register Your Scheduler</h2>
+  <pre><code>from scheduler.my_scheduler import MyScheduler
+from core.simulator import Simulator
+
+def main():
+    scheduler = MyScheduler()
+    simulator = Simulator(scheduler=scheduler)
+    simulator.run()
+</code></pre>
+
+  <h2>Need Help?</h2>
+  <p>Visit our discussion forum: 
+    <a href="https://resp.afzalbadshah.com" target="_blank" rel="noopener">resp.afzalbadshah.com</a>
+  </p>
+</main>
+
+<footer>
+  RegionalEdgeSimPy — Educational Release
+</footer>
+</body>
+</html>
