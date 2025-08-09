@@ -11,6 +11,9 @@ Website: https://afzalbadshah.com/index.php/afzal-badshah/
 LinkedIn: https://www.linkedin.com/in/afzal-badshah-phd-305b03164/  
 **Discussion Forum:** https://resp.afzalbadshah.com
 
+
+![RegionalEdgSimPy](https://github.com/user-attachments/assets/e9ee8ae6-3288-46ae-b681-7ef32363a25f)
+
 ---
 
 ## What’s included (from this simulator)
